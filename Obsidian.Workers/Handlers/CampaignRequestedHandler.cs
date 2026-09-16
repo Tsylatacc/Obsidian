@@ -1,0 +1,32 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Obsidian.Application.Features;
+using Obsidian.Domain.Entities;
+using Obsidian.Domain.Enums;
+using Obsidian.Infrastructure.Persistence;
+
+namespace Obsidian.Workers.Handlers
+{
+    public sealed class CampaignRequestedHandler
+    {
+        public static async Task Handle(
+            CampaignRequested message,
+            ObsidianDbContext db,
+            CancellationToken cancellationToken)
+        {
+            Campaign campaign = await db.Campaigns
+                .Include(x => x.Media)
+                .Include(x => x.Recipients)
+                .SingleOrDefaultAsync(x => x.Id == message.CampaignId, cancellationToken)
+                ?? throw new KeyNotFoundException($"Campaign {message.CampaignId} not found");
+
+            if (campaign.Status != CampaignStatus.Pending)
+                throw new InvalidOperationException($"Campaign {message.CampaignId} is not a valid state.");
+
+            foreach (Recipient recipient in campaign.Recipients)
+            {
+
+            }
+
+        }
+    }
+}

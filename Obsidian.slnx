@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Itens de Solução/">
+    <File Path="docker-compose.yml" />
+    <File Path=".dockerignore" />
+    <File Path="run.ps1" />
+    <File Path="Dockerfile.api" />
+    <File Path="Dockerfile.worker" />
+  </Folder>
+  <Project Path="Obsidian.Api/Obsidian.Api.csproj" />
+  <Project Path="Obsidian.Application/Obsidian.Application.csproj" />
+  <Project Path="Obsidian.Domain/Obsidian.Domain.csproj" />
+  <Project Path="Obsidian.Infrastructure/Obsidian.Infrastructure.csproj" />
+  <Project Path="Obsidian.Workers/Obsidian.Workers.csproj" />
+</Solution>

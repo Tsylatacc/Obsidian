@@ -1,0 +1,223 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: obsidian-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is not defined}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is not defined}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is not defined}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - obsidian-postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is not defined} -d ${POSTGRES_DB:?POSTGRES_DB is not defined}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - obsidian-network
+
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: obsidian-rabbitmq
+    restart: unless-stopped
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:?RABBITMQ_DEFAULT_USER is not defined}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?RABBITMQ_DEFAULT_PASS is not defined}
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    volumes:
+      - obsidian-rabbitmq-data:/var/lib/rabbitmq
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - obsidian-network
+
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+
+    container_name: obsidian-api
+    restart: unless-stopped
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:?ASPNETCORE_ENVIRONMENT is not defined}
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS:?ASPNETCORE_URLS is not defined}
+
+      ConnectionStrings__db: ${ConnectionStrings__db:?ConnectionStrings__db is not defined}
+      ConnectionStrings__rabbitmq: ${ConnectionStrings__rabbitmq:?ConnectionStrings__rabbitmq is not defined}
+
+      EvolutionApi__ApiUrl: ${EvolutionApi__ApiUrl:?EvolutionApi__ApiKey is not defined}
+      EvolutionApi__ApiKey: ${EvolutionApi__ApiKey:?EvolutionApi__ApiKey is not defined}
+
+    ports:
+      - "7249:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+      evolution-api:
+        condition: service_started
+
+    networks:
+      - obsidian-network
+      - evolution-network
+
+
+  workers:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+
+    container_name: obsidian-workers
+    restart: unless-stopped
+
+    environment:
+      DOTNET_ENVIRONMENT: ${DOTNET_ENVIRONMENT:?DOTNET_ENVIRONMENT is not defined}
+
+      ConnectionStrings__db: ${ConnectionStrings__db:?ConnectionStrings__db is not defined}
+      ConnectionStrings__rabbitmq: ${ConnectionStrings__rabbitmq:?ConnectionStrings__rabbitmq is not defined}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+    networks:
+      - obsidian-network
+
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    container_name: evolution-api
+    restart: unless-stopped
+
+    environment:
+      AUTHENTICATION_API_KEY: ${EvolutionApi__ApiKey:?EvolutionApi__ApiKey is not defined}
+
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://postgres:${EVOLUTION_POSTGRES_PASSWORD}@evolution-postgres:5432/${EVOLUTION_POSTGRES_DB}
+
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://evolution-redis:6379/1
+
+      WEBSOCKET_ENABLED: "true"
+      WEBSOCKET_GLOBAL_EVENTS: "true"
+      WEBSOCKET_ALLOWED_HOSTS: "*"
+
+      TZ: America/Sao_Paulo
+      DOCKER_ENV: "true"
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      evolution-postgres:
+        condition: service_healthy
+
+      evolution-redis:
+        condition: service_healthy
+
+    networks:
+      - evolution-network
+
+
+  evolution-postgres:
+    image: postgres:17
+    container_name: evolution-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${EVOLUTION_POSTGRES_DB:?EVOLUTION_POSTGRES_DB is not defined}
+      POSTGRES_USER: ${EVOLUTION_POSTGRES_USER:?EVOLUTION_POSTGRES_USER is not defined}
+      POSTGRES_PASSWORD: ${EVOLUTION_POSTGRES_PASSWORD:?EVOLUTION_POSTGRES_PASSWORD is not defined}
+
+    volumes:
+      - evolution-postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${EVOLUTION_POSTGRES_USER:?EVOLUTION_POSTGRES_USER is not defined} -d ${EVOLUTION_POSTGRES_DB:?EVOLUTION_POSTGRES_DB is not defined}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - evolution-network
+
+
+  evolution-redis:
+    image: redis:7
+    container_name: evolution-redis
+    restart: unless-stopped
+
+    volumes:
+      - evolution-redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - evolution-network
+
+
+volumes:
+
+  obsidian-postgres-data:
+    name: obsidian-postgres-data
+
+  obsidian-rabbitmq-data:
+    name: obsidian-rabbitmq-data
+
+  evolution-postgres-data:
+    name: evolution-postgres-data
+
+  evolution-redis-data:
+    name: evolution-redis-data
+
+
+networks:
+
+  obsidian-network:
+    name: obsidian-network
+    driver: bridge
+
+  evolution-network:
+    name: evolution-network
+    driver: bridge

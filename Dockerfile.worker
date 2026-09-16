@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY ["Obsidian.Workers/Obsidian.Workers.csproj", "Obsidian.Workers/"]
+COPY ["Obsidian.Application/Obsidian.Application.csproj", "Obsidian.Application/"]
+COPY ["Obsidian.Domain/Obsidian.Domain.csproj", "Obsidian.Domain/"]
+COPY ["Obsidian.Infrastructure/Obsidian.Infrastructure.csproj", "Obsidian.Infrastructure/"]
+RUN dotnet restore "Obsidian.Workers/Obsidian.Workers.csproj"
+
+COPY . .
+WORKDIR "/src/Obsidian.Workers"
+RUN dotnet publish "Obsidian.Workers.csproj" -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "Obsidian.Workers.dll"]
