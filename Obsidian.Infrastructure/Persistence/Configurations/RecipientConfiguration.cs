@@ -11,7 +11,6 @@ public sealed class RecipientConfiguration : IEntityTypeConfiguration<Recipient>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.CampaignId)
-            .HasColumnName("campaign_id")
             .IsRequired();
 
         builder.Property(x => x.Status)
@@ -27,7 +26,6 @@ public sealed class RecipientConfiguration : IEntityTypeConfiguration<Recipient>
         builder.OwnsOne(x => x.PhoneNumber, phoneNumber =>
         {
             phoneNumber.Property(x => x.Value)
-                .HasColumnName("phone_number")
                 .IsRequired()
                 .HasMaxLength(30);
         });
