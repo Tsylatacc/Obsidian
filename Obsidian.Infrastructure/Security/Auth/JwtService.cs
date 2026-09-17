@@ -17,11 +17,12 @@ namespace Obsidian.Infrastructure.Security.Auth
             _configuration = configuration;
         }
 
-        public JwtDto GenerateBearerToken(Guid userId, string email)
+        public JwtDto GenerateBearerToken(Guid userId, Guid tenantId, string email)
         {
             Claim[] claims =
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(JwtCustomClaims.TenantId, tenantId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
