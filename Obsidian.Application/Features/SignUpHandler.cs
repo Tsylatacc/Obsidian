@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JasperFx.MultiTenancy;
+using Microsoft.EntityFrameworkCore;
 using Obsidian.Domain.Entities;
 using Obsidian.Domain.Enums;
 using Obsidian.Infrastructure.Abstractions;
@@ -14,6 +15,7 @@ namespace Obsidian.Application.Features
              SignUpCommand command,
              ObsidianDbContext db,
              IJwtService jwtService,
+             TenantId tenantId,
              CancellationToken cancellationToken)
         {
             if (await db.Users
@@ -48,7 +50,10 @@ namespace Obsidian.Application.Features
             await db.Users.AddAsync(user, cancellationToken);
             await db.Subscriptions.AddAsync(subscription, cancellationToken);
 
-            JwtDto jwtDto = jwtService.GenerateBearerToken(user.Id, user.Email);
+            JwtDto jwtDto = jwtService.GenerateBearerToken(
+                user.Id,
+                Guid.Parse(tenantId.Value),
+                user.Email);
             return new SignUpResult(
                 jwtDto.Token,
                 jwtDto.ExpiresAt,
