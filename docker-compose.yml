@@ -197,6 +197,25 @@ services:
       - evolution-network
 
 
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile.migration
+    command:
+      - database
+      - update
+      - --project
+      - Obsidian.Infrastructure/Obsidian.Infrastructure.csproj
+      - --startup-project
+      - Obsidian.Api/Obsidian.Api.csproj
+    environment:
+      ConnectionStrings__db: ${ConnectionStrings__db:?ConnectionStrings__db is not defined}
+      ConnectionStrings__rabbitmq: ${ConnectionStrings__rabbitmq:?ConnectionStrings__rabbitmq is not defined}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - obsidian-network
 volumes:
 
   obsidian-postgres-data:
