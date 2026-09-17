@@ -4,15 +4,13 @@ using Obsidian.Domain.Entities;
 
 namespace Obsidian.Infrastructure.Persistence.Configurations;
 
-public sealed class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
+public sealed class CampaignConfiguration
+    : IEntityTypeConfiguration<Campaign>
 {
-    public void Configure(EntityTypeBuilder<Campaign> builder)
+    public void Configure(
+        EntityTypeBuilder<Campaign> builder)
     {
         builder.HasKey(x => x.Id);
-
-        builder.Property(x => x.Message)
-            .IsRequired()
-            .HasMaxLength(5000);
 
         builder.Property(x => x.ChannelId)
             .IsRequired();
@@ -34,27 +32,37 @@ public sealed class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
 
         builder.Property(x => x.FinishedAt);
 
-        builder.OwnsOne(x => x.Media, media =>
-        {
-            media.Property(x => x.Type)
-                .HasConversion<string>()
-                .IsRequired();
+        builder.OwnsMany(
+            x => x.Contents,
+            content =>
+            {
+                content.HasKey(x => x.Position);
 
-            media.Property(x => x.MimeType)
-                .IsRequired()
-                .HasMaxLength(100);
+                content.Property(x => x.Position)
+                    .IsRequired();
 
-            media.Property(x => x.Caption)
-                .HasMaxLength(1000);
+                content.Property(x => x.Type)
+                    .HasConversion<string>()
+                    .IsRequired();
 
-            media.Property(x => x.Url)
-                .IsRequired()
-                .HasMaxLength(2000);
+                content.Property(x => x.Text)
+                    .HasMaxLength(5000);
 
-            media.Property(x => x.FileName)
-                .IsRequired()
-                .HasMaxLength(255);
-        });
+                content.Property(x => x.MediaType)
+                    .HasConversion<string>();
+
+                content.Property(x => x.MimeType)
+                    .HasMaxLength(100);
+
+                content.Property(x => x.Caption)
+                    .HasMaxLength(1000);
+
+                content.Property(x => x.Url)
+                    .HasMaxLength(2000);
+
+                content.Property(x => x.FileName)
+                    .HasMaxLength(255);
+            });
 
         builder.HasMany(x => x.Recipients)
             .WithOne()

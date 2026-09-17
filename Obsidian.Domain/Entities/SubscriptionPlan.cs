@@ -10,6 +10,7 @@ namespace Obsidian.Domain.Entities
 
         public decimal Price { get; private set; }
         public TimeSpan Duration { get; private set; }
+        public string? Description { get; private set; } = default!;
 
         public int MessageLimit { get; private set; }
         public int ChannelLimit { get; private set; }

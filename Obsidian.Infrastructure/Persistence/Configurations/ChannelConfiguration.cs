@@ -38,7 +38,6 @@ public sealed class ChannelConfiguration : IEntityTypeConfiguration<Channel>
         builder.OwnsOne(x => x.PhoneNumber, phoneNumber =>
         {
             phoneNumber.Property(x => x.Value)
-                .HasColumnName("phone_number")
                 .IsRequired()
                 .HasMaxLength(30);
         });

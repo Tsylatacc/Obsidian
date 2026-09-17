@@ -78,3 +78,8 @@ docker compose @composeArguments
 if ($LASTEXITCODE -ne 0) {
 	exit $LASTEXITCODE
 }
+
+docker compose run --rm migration
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}

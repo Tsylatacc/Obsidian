@@ -1,71 +1,88 @@
-﻿using Obsidian.Domain.Enums;
+﻿using JasperFx.MultiTenancy;
+using Obsidian.Domain.Enums;
 using Obsidian.Domain.ValueObjects;
-using JasperFx.MultiTenancy;
 
+namespace Obsidian.Domain.Entities;
 
-namespace Obsidian.Domain.Entities
+public class Campaign : ITenanted
 {
-    public class Campaign : ITenanted
+    public Guid Id { get; private set; }
+    public string Name { get; private set; } = default!;
+
+    public Guid ChannelId { get; private set; }
+    public Channel Channel { get; private set; } = default!;
+
+    public CampaignStatus Status { get; private set; }
+
+    private readonly List<CampaignContent> _contents = [];
+
+    public IReadOnlyCollection<CampaignContent> Contents =>
+        _contents.AsReadOnly();
+
+    private readonly List<Recipient> _recipients = [];
+
+    public IReadOnlyCollection<Recipient> Recipients =>
+        _recipients.AsReadOnly();
+
+    public string? TenantId { get; set; }
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset? FinishedAt { get; private set; }
+
+    private Campaign()
     {
-        public Guid Id { get; private set; }
-        public string Message { get; private set; } = default!;
+    }
 
-        public Guid ChannelId { get; private set; }
-        public Channel Channel { get; private set; } = default!;
+    private Campaign(Guid channelId)
+    {
+        Id = Guid.NewGuid();
+        Name = $"Campaign {Guid.NewGuid().ToString()[..8].ToUpper()}";
+        ChannelId = channelId;
+        Status = CampaignStatus.Pending;
+        CreatedAt = DateTimeOffset.UtcNow;
+    }
 
-        public CampaignMedia? Media { get; private set; }
-        public CampaignStatus Status { get; private set; }
+    public static Campaign Create(Guid channelId)
+    {
+        if (channelId == Guid.Empty)
+            throw new ArgumentException(
+                "ChannelId is required.",
+                nameof(channelId));
 
-        private readonly List<Recipient> _recipients = [];
-        public IReadOnlyCollection<Recipient> Recipients => _recipients.AsReadOnly();
+        return new Campaign(channelId);
+    }
 
-        public string? TenantId { get; set; }
-        public DateTimeOffset CreatedAt { get; private set; }
-        public DateTimeOffset? FinishedAt { get; private set; }
+    public void SetContents(
+        IReadOnlyCollection<CampaignContent> contents)
+    {
+        if (contents.Count == 0)
+            throw new ArgumentException(
+                "At least one content is required.",
+                nameof(contents));
 
-        private Campaign() { } // EF Core
-
-        private Campaign(
-            string message,
-            Guid channelId,
-            CampaignMedia? media)
+        if (contents
+            .Select(x => x.Position)
+            .Distinct()
+            .Count() != contents.Count)
         {
-            Id = Guid.NewGuid();
-            Message = message;
-            ChannelId = channelId;
-            Media = media;
-            Status = CampaignStatus.Pending;
-
-            CreatedAt = DateTimeOffset.UtcNow;
+            throw new ArgumentException(
+                "Content positions must be unique.",
+                nameof(contents));
         }
 
-        public static Campaign Create(
-        string message,
-        Guid channelId,
-        CampaignMedia? media = null)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-                throw new ArgumentException(
-                    "Message is required.",
-                    nameof(message));
+        _contents.Clear();
 
-            if (channelId == Guid.Empty)
-                throw new ArgumentException(
-                    "ChannelId is required.",
-                    nameof(message));
+        _contents.AddRange(
+            contents.OrderBy(x => x.Position));
+    }
 
-            return new Campaign(
-                message,
-                channelId,
-                media);
-        }
+    public void SetRecipients(
+        IReadOnlyCollection<Recipient> recipients)
+    {
+        if (recipients.Count == 0)
+            throw new ArgumentException(
+                "At least one recipient is required.",
+                nameof(recipients));
 
-        public void SetRecipients(IReadOnlyCollection<Recipient> deliveries)
-        {
-            if (deliveries.Count == 0)
-                throw new ArgumentException("At least one recipient is required.");
-
-            _recipients.AddRange(deliveries.Distinct());
-        }
+        _recipients.AddRange(recipients.Distinct());
     }
 }

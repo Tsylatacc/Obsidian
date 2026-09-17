@@ -4,6 +4,7 @@
     <File Path=".dockerignore" />
     <File Path="run.ps1" />
     <File Path="Dockerfile.api" />
+    <File Path="Dockerfile.migration" />
     <File Path="Dockerfile.worker" />
   </Folder>
   <Project Path="Obsidian.Api/Obsidian.Api.csproj" />
