@@ -7,7 +7,7 @@ namespace Obsidian.Domain.Entities
     public class Recipient : ITenanted
     {
         public Guid Id { get; private set; }
-        public Guid BroadcastId { get; private set; }
+        public Guid CampaignId { get; private set; }
         public PhoneNumber PhoneNumber { get; private set; } = default!;
         public DeliveryStatus Status { get; private set; }
 
@@ -18,11 +18,11 @@ namespace Obsidian.Domain.Entities
         private Recipient() { } // EF Core
 
         private Recipient(
-            Guid broadcastId,
+            Guid campaignId,
             PhoneNumber phoneNumber)
         {
             Id = Guid.NewGuid();
-            BroadcastId = broadcastId;
+            CampaignId = campaignId;
             PhoneNumber = phoneNumber;
             Status = DeliveryStatus.Pending;
 
@@ -30,7 +30,7 @@ namespace Obsidian.Domain.Entities
         }
 
         public static Recipient Create(
-            Guid broadcastId,
+            Guid campaignId,
             string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -38,15 +38,15 @@ namespace Obsidian.Domain.Entities
                     "Argument 'phoneNumber' cannot be empty.",
                     nameof(phoneNumber));
 
-            if (broadcastId == Guid.Empty)
+            if (campaignId == Guid.Empty)
                 throw new ArgumentException(
-                    "Argument 'broadcastId' cannot be empty.",
-                    nameof(broadcastId));
+                    "Argument 'campaignId' cannot be empty.",
+                    nameof(campaignId));
 
             var phone = PhoneNumber.Create(phoneNumber);
 
             return new Recipient(
-                broadcastId,
+                campaignId,
                 phone);
         }
     }
