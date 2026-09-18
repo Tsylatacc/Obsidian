@@ -18,7 +18,7 @@ public sealed class SubscriptionUsageConfiguration : IEntityTypeConfiguration<Su
             .HasForeignKey(x => x.SubscriptionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.MessagedUsed)
+        builder.Property(x => x.MessagesUsed)
             .IsRequired();
 
         builder.Property(x => x.ChannelsUsed)
