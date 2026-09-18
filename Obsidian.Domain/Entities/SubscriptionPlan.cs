@@ -12,8 +12,11 @@ namespace Obsidian.Domain.Entities
         public TimeSpan Duration { get; private set; }
         public string? Description { get; private set; } = default!;
 
+        public int CampaignLimit { get; private set; }
         public int MessageLimit { get; private set; }
         public int ChannelLimit { get; private set; }
+
+        public int RecipientPerCampaignLimit { get; private set; }
 
         public bool IsActive { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }

@@ -12,7 +12,7 @@ namespace Obsidian.Domain.Entities
         public DeliveryStatus Status { get; private set; }
 
         public string? TenantId { get; set; }
-        public DateTimeOffset? DeliveredAt { get; private set; }
+        public DateTimeOffset? UpdatedAt { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
 
         private Recipient() { } // EF Core
@@ -48,6 +48,24 @@ namespace Obsidian.Domain.Entities
             return new Recipient(
                 campaignId,
                 phone);
+        }
+
+        public void DeliveryFailed()
+        {
+            if (Status == DeliveryStatus.Failed)
+                return;
+
+            Status = DeliveryStatus.Failed;
+            UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        public void SuccessfulDelivery()
+        {
+            if (Status == DeliveryStatus.Delivered)
+                return;
+
+            Status = DeliveryStatus.Delivered;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }
