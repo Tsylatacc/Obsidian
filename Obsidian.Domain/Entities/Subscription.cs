@@ -70,5 +70,14 @@ namespace Obsidian.Domain.Entities
             SubscriptionUsage subscriptionUsage = SubscriptionUsage.Create(this);
             _subscriptionUsages.Add(subscriptionUsage);
         }
+
+        public void EnsureIsValid()
+        {
+            if (!SubscriptionPlan.IsActive)
+                throw new InvalidOperationException($"Subscription plan {SubscriptionPlanId} is not active.");
+            
+            if (Status != SubscriptionStatus.Active)
+                throw new InvalidOperationException($"Subscription {Id} is not active.");
+        }
     }
 }

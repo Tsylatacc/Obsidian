@@ -14,6 +14,13 @@ public sealed class CampaignRequestedHandler
         ObsidianDbContext db,
         CancellationToken cancellationToken)
     {
+        Channel channel = await db.Channels
+             .SingleOrDefaultAsync(
+                 x => x.Id == message.ChannelId,
+                 cancellationToken)
+             ?? throw new KeyNotFoundException(
+                 $"Channel {message.ChannelId} not found");
+
         Campaign campaign = await db.Campaigns
             .Include(x => x.Contents)
             .Include(x => x.Recipients)
@@ -29,6 +36,9 @@ public sealed class CampaignRequestedHandler
 
         foreach (Recipient recipient in campaign.Recipients)
         {
+            if (channel.Status != ChannelStatus.Open)
+                recipient.DeliveryFailed(); 
+
             foreach (CampaignContent content in campaign.Contents
                 .OrderBy(x => x.Position))
             {
@@ -45,6 +55,7 @@ public sealed class CampaignRequestedHandler
                             $"Unsupported campaign content type: {content.Type}");
                 }
             }
+            recipient.SuccessfulDelivery();
         }
     }
 }

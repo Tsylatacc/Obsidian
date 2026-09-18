@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Obsidian.Domain.Entities;
 using Obsidian.Domain.Enums;
 using Obsidian.Domain.ValueObjects;
+using Obsidian.Infrastructure.Abstractions;
 using Obsidian.Infrastructure.Persistence;
 using Wolverine;
 
@@ -13,6 +14,7 @@ public class CampaignHandler
     public static async Task Handle(
         CampaignCommand command,
         ObsidianDbContext db,
+        ICurrentUser currentUser,
         IMessageBus bus,
         CancellationToken cancellationToken)
     {
@@ -24,20 +26,24 @@ public class CampaignHandler
                 $"Channel {command.ChannelId} not found.");
         }
 
-        if (command.PhoneNumbers.Count == 0)
-            throw new ArgumentException(
-                "At least one phone number is required.",
-                nameof(command.PhoneNumbers));
+        User user = await db.Users
+            .Where(x => x.Id == currentUser.UserId)
+            .Include(x => x.Subscription)
+                .ThenInclude(x => x.SubscriptionUsages)
+            .SingleOrDefaultAsync(cancellationToken) ??
+            throw new KeyNotFoundException(
+                $"User {currentUser.UserId} not found.");
 
-        if (command.PhoneNumbers.Count > 10000)
-            throw new ArgumentException(
-                "Maximum of 10,000 phone numbers.",
-                nameof(command.PhoneNumbers));
+        SubscriptionUsage subscriptionUsage =
+            user.Subscription.SubscriptionUsages
+                .OrderByDescending(x => x.PeriodStartedAt)
+                .FirstOrDefault() ?? throw new InvalidOperationException(
+                    "Last subscription usage was not found.");
 
-        if (command.Items.Count == 0)
-            throw new ArgumentException(
-                "At least one item is required.",
-                nameof(command.Items));
+        user.Subscription.EnsureIsValid();
+        subscriptionUsage.EnsureIsValid(
+            command.Items.Count, 
+            command.PhoneNumbers.Count);
 
         List<CampaignContent> contents = [];
 
@@ -91,6 +97,10 @@ public class CampaignHandler
             Campaign.Create(command.ChannelId);
 
         campaign.SetContents(contents);
+        
+        subscriptionUsage.AddUsage(
+            command.Items.Count,
+            command.PhoneNumbers.Count);
 
         List<Recipient> recipients = [];
 
@@ -103,6 +113,7 @@ public class CampaignHandler
         }
 
         campaign.SetRecipients(recipients);
+        
 
         await db.Campaigns.AddAsync(
             campaign,
