@@ -51,9 +51,4 @@ namespace Obsidian.Api.Endpoints
                 cancellationToken);
         }
     }
-
-
-
-
-
 }
