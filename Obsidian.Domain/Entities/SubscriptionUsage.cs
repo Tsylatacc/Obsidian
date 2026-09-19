@@ -1,5 +1,4 @@
 ﻿using JasperFx.MultiTenancy;
-using System.Numerics;
 
 namespace Obsidian.Domain.Entities
 {
@@ -50,7 +49,7 @@ namespace Obsidian.Domain.Entities
                 throw new InvalidOperationException(
                     "The subscription usage period has expired.");
 
-            if (!Subscription.SubscriptionPlan.IsActive)
+            if (!Subscription.Plan.IsActive)
                 throw new InvalidOperationException(
                     "Subscription is not active.");
 
@@ -64,26 +63,26 @@ namespace Obsidian.Domain.Entities
                     "At least one phone number is required.",
                     nameof(phoneNumbersCount));
 
-            if (phoneNumbersCount > Subscription.SubscriptionPlan.RecipientPerCampaignLimit)
+            if (phoneNumbersCount > Subscription.Plan.RecipientPerCampaignLimit)
                 throw new InvalidOperationException(
                     "The subscription recipient limit has been exceeded.");
 
-            if (CampaignsUsed >= Subscription.SubscriptionPlan.CampaignLimit)
+            if (CampaignsUsed >= Subscription.Plan.CampaignLimit)
                 throw new InvalidOperationException(
                     "The subscription campaign limit has been exceeded.");
 
-            if (MessagesUsed + itemsCount * phoneNumbersCount > Subscription.SubscriptionPlan.MessageLimit)
+            if (MessagesUsed + itemsCount * phoneNumbersCount > Subscription.Plan.MessageLimit)
                 throw new InvalidOperationException(
                     "The subscription message limit has been exceeded.");
         }
 
         public void AddUsage(int itemsCount, int phoneNumbersCount)
         {
-            if (CampaignsUsed >= Subscription.SubscriptionPlan.CampaignLimit)
+            if (CampaignsUsed >= Subscription.Plan.CampaignLimit)
                 throw new InvalidOperationException(
                     "The subscription campaign limit has been exceeded.");
 
-            if (MessagesUsed + itemsCount * phoneNumbersCount > Subscription.SubscriptionPlan.MessageLimit)
+            if (MessagesUsed + itemsCount * phoneNumbersCount > Subscription.Plan.MessageLimit)
                 throw new InvalidOperationException(
                     "The subscription message limit has been exceeded.");
 
@@ -92,10 +91,10 @@ namespace Obsidian.Domain.Entities
         }
 
         public int CampaignsRemaining => 
-            Subscription.SubscriptionPlan.CampaignLimit - CampaignsUsed;
+            Subscription.Plan.CampaignLimit - CampaignsUsed;
         public int MessagesRemaining => 
-            Subscription.SubscriptionPlan.MessageLimit - MessagesUsed;
+            Subscription.Plan.MessageLimit - MessagesUsed;
         public int ChannelsRemaining => 
-            Subscription.SubscriptionPlan.ChannelLimit - ChannelsUsed;
+            Subscription.Plan.ChannelLimit - ChannelsUsed;
     }
 }

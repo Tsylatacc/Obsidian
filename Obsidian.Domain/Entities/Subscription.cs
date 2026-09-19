@@ -1,4 +1,5 @@
 ﻿using JasperFx.MultiTenancy;
+using System.Linq;
 using Obsidian.Domain.Enums;
 
 namespace Obsidian.Domain.Entities
@@ -8,8 +9,8 @@ namespace Obsidian.Domain.Entities
         public Guid Id { get; private set; }
         public string Identifier { get; private set; } = default!;
 
-        public Guid SubscriptionPlanId { get; private set; }
-        public SubscriptionPlan SubscriptionPlan { get; private set; } = default!;
+        public Guid PlanId { get; private set; }
+        public SubscriptionPlan Plan { get; private set; } = default!;
 
         private readonly List<SubscriptionUsage> _subscriptionUsages = [];
         public IReadOnlyCollection<SubscriptionUsage> SubscriptionUsages => _subscriptionUsages.AsReadOnly();
@@ -32,8 +33,8 @@ namespace Obsidian.Domain.Entities
             Id = Guid.NewGuid();
             Identifier = Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
 
-            SubscriptionPlanId = subscriptionPlan.Id;
-            SubscriptionPlan = subscriptionPlan;
+            PlanId = subscriptionPlan.Id;
+            Plan = subscriptionPlan;
 
             Status = SubscriptionStatus.PendingActivation;
 
@@ -64,8 +65,12 @@ namespace Obsidian.Domain.Entities
 
         public void AddUsage()
         {
-            if (_subscriptionUsages[_subscriptionUsages.Count - 1].PeriodExpiresAt < DateTimeOffset.UtcNow)
-                throw new InvalidOperationException("The most recent use of the subscription is still withthe expiration period.");
+            if (_subscriptionUsages.LastOrDefault() is { } lastUsage &&
+                lastUsage.PeriodExpiresAt > DateTimeOffset.UtcNow)
+            {
+                throw new InvalidOperationException(
+                    "The most recent use of the subscription is still within the expiration period.");
+            }
 
             SubscriptionUsage subscriptionUsage = SubscriptionUsage.Create(this);
             _subscriptionUsages.Add(subscriptionUsage);
@@ -73,8 +78,8 @@ namespace Obsidian.Domain.Entities
 
         public void EnsureIsValid()
         {
-            if (!SubscriptionPlan.IsActive)
-                throw new InvalidOperationException($"Subscription plan {SubscriptionPlanId} is not active.");
+            if (!Plan.IsActive)
+                throw new InvalidOperationException($"Subscription plan {PlanId} is not active.");
             
             if (Status != SubscriptionStatus.Active)
                 throw new InvalidOperationException($"Subscription {Id} is not active.");

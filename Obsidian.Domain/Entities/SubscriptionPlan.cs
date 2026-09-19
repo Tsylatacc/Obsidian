@@ -27,16 +27,20 @@ namespace Obsidian.Domain.Entities
         private SubscriptionPlan(
             string name,
             decimal price,
+            int campaignLimit,
             int messageLimit,
             int channelLimit,
+            int recipientPerCampaignLimit,
             SubscriptionPlanType type,
             TimeSpan duration)
         {
             Id = Guid.NewGuid();
             Name = name;
             Price = price;
+            CampaignLimit = campaignLimit;
             MessageLimit = messageLimit;
             ChannelLimit = channelLimit;
+            RecipientPerCampaignLimit = recipientPerCampaignLimit;
             IsActive = true;
             Type = type;
             Duration = duration;
@@ -45,8 +49,10 @@ namespace Obsidian.Domain.Entities
         public static SubscriptionPlan Create(
             string name,
             decimal price,
+            int campaignLimit,
             int messageLimit,
             int channelLimit,
+            int recipientPerCampaignLimit,
             SubscriptionPlanType type,
             TimeSpan duration)
         {
@@ -60,6 +66,11 @@ namespace Obsidian.Domain.Entities
                     "Argument 'price' cannot be negative.",
                     nameof(price));
 
+            if (campaignLimit <= 0)
+                throw new ArgumentException(
+                    "Argument 'campaignLimit' cannot be equal or less than zero.",
+                    nameof(campaignLimit));
+
             if (messageLimit <= 0)
                 throw new ArgumentException(
                     "Argument 'messageLimit ' cannot be equal or less than zero.",
@@ -69,6 +80,11 @@ namespace Obsidian.Domain.Entities
                 throw new ArgumentException(
                     "Argument 'channelLimit' cannot be equal or less than zero.",
                     nameof(channelLimit));
+
+            if (recipientPerCampaignLimit <= 0)
+                throw new ArgumentException(
+                    "Argument 'recipientPerCampaignLimit' cannot be equal or less than zero.",
+                    nameof(recipientPerCampaignLimit));
 
             if (!Enum.IsDefined(type))
                 throw new ArgumentException(
@@ -83,8 +99,10 @@ namespace Obsidian.Domain.Entities
             return new SubscriptionPlan(
                 name,
                 price,
+                campaignLimit,
                 messageLimit,
                 channelLimit,
+                recipientPerCampaignLimit,
                 type,
                 duration);
         }

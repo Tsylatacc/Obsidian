@@ -8,6 +8,7 @@ namespace Obsidian.Domain.Entities
         public string Name { get; private set; } = default!;
         public string Email { get; private set; } = default!;
         public string PasswordHash { get; private set; } = default!;
+        public bool IsAdmin { get; private set; }
 
         public Guid SubscriptionId { get; private set; }
         public Subscription Subscription { get; private set; } = default!;
@@ -24,12 +25,14 @@ namespace Obsidian.Domain.Entities
         private User(
             string email,
             string passwordHash,
-            Guid subscriptionId)
+            Guid subscriptionId,
+            bool isAdmin = false)
         {
             Id = Guid.NewGuid();
             Name = email;
             Email = email;
             PasswordHash = passwordHash;
+            IsAdmin = isAdmin;
 
             SubscriptionId = subscriptionId;
         }
@@ -37,7 +40,8 @@ namespace Obsidian.Domain.Entities
         public static User Create(
             string email,
             string passwordHash,
-            Guid subscriptionId)
+            Guid subscriptionId,
+            bool isAdmin = false)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException(
@@ -57,7 +61,8 @@ namespace Obsidian.Domain.Entities
             return new User(
                 email,
                 passwordHash,
-                subscriptionId);
+                subscriptionId,
+                isAdmin);
         }
     }
 }

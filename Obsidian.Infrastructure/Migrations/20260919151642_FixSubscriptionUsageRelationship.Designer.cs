@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Obsidian.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Obsidian.Infrastructure.Persistence;
 namespace Obsidian.Infrastructure.Migrations
 {
     [DbContext(typeof(ObsidianDbContext))]
-    partial class ObsidianDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919151642_FixSubscriptionUsageRelationship")]
+    partial class FixSubscriptionUsageRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
