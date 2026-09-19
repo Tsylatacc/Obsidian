@@ -8,6 +8,7 @@ namespace Obsidian.Application.Features
     public class GetUserUsageHandler
     {
         public static async Task<GetUserUsageResponse> Handle(
+             GetUserUsageCommand command,
              ObsidianDbContext db,
              ICurrentUser currentUser,
              CancellationToken cancellationToken)
@@ -31,6 +32,7 @@ namespace Obsidian.Application.Features
                 subscriptionUsage.PeriodExpiresAt);
         }
     }
+    public sealed record GetUserUsageCommand();
     public sealed record GetUserUsageResponse(
         int CampaignsUsed,
         int CampaignsRemaining,

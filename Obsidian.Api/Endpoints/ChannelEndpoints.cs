@@ -12,7 +12,7 @@ namespace Obsidian.Api.Endpoints
         [Authorize]
         [WolverinePost("/api/channels"), RequiresTenant]
         public static async Task<CreateChannelResponse> Create(
-            ConnectChannelCommand command,
+            CreateChannelCommand command,
             IMessageBus bus,
             ICurrentUser currentUser,
             CancellationToken cancellationToken)

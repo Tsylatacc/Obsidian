@@ -17,12 +17,12 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.HasIndex(x => x.Identifier)
             .IsUnique();
 
-        builder.Property(x => x.SubscriptionPlanId)
+        builder.Property(x => x.PlanId)
             .IsRequired();
 
-        builder.HasOne(x => x.SubscriptionPlan)
+        builder.HasOne(x => x.Plan)
             .WithMany()
-            .HasForeignKey(x => x.SubscriptionPlanId)
+            .HasForeignKey(x => x.PlanId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(x => x.Status)

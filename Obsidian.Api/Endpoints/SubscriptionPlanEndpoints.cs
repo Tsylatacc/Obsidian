@@ -14,6 +14,7 @@ namespace Obsidian.Api.Endpoints
             CancellationToken cancellationToken)
         {
             return await bus.InvokeAsync<GetSubscriptionPlansResponse>(
+                new GetSubscriptionPlansCommand(),
                 cancellationToken);
         }
     }

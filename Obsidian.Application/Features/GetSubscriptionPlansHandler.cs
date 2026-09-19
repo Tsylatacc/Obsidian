@@ -7,6 +7,7 @@ namespace Obsidian.Application.Features
     public class GetSubscriptionPlansHandler
     {
         public static async Task<GetSubscriptionPlansResponse> Handle(
+             GetSubscriptionPlansCommand command,
              ObsidianDbContext db,
              CancellationToken cancellationToken)
         {
@@ -30,6 +31,7 @@ namespace Obsidian.Application.Features
             return new GetSubscriptionPlansResponse(result);
         }
     }
+    public sealed record GetSubscriptionPlansCommand();
     public sealed record GetSubscriptionPlansResponse(
         IReadOnlyCollection<GetSubscriptionPlansResult> SubscriptionPlans
     );

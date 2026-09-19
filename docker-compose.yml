@@ -71,8 +71,13 @@ services:
       ConnectionStrings__db: ${ConnectionStrings__db:?ConnectionStrings__db is not defined}
       ConnectionStrings__rabbitmq: ${ConnectionStrings__rabbitmq:?ConnectionStrings__rabbitmq is not defined}
 
-      EvolutionApi__ApiUrl: ${EvolutionApi__ApiUrl:?EvolutionApi__ApiKey is not defined}
+      EvolutionApi__ApiUrl: ${EvolutionApi__ApiUrl:?EvolutionApi__ApiUrl is not defined}
       EvolutionApi__ApiKey: ${EvolutionApi__ApiKey:?EvolutionApi__ApiKey is not defined}
+      Cors__Origins__0: ${Cors__Origins__0:?Cors__Origins__0 is not defined}
+      Jwt__Bearer__Key: ${Jwt__Bearer__Key:?Jwt__Bearer__Key is not defined}
+      Jwt__Bearer__Issuer: ${Jwt__Bearer__Issuer:?Jwt__Bearer__Issuer is not defined}
+      Jwt__Bearer__Audience: ${Jwt__Bearer__Audience:?Jwt__Bearer__Audience is not defined}
+      Jwt__Bearer__ExpiresInMinutes: ${Jwt__Bearer__ExpiresInMinutes:?Jwt__Bearer__ExpiresInMinutes is not defined}
 
     ports:
       - "7249:8080"
@@ -126,7 +131,7 @@ services:
       AUTHENTICATION_API_KEY: ${EvolutionApi__ApiKey:?EvolutionApi__ApiKey is not defined}
 
       DATABASE_PROVIDER: postgresql
-      DATABASE_CONNECTION_URI: postgresql://postgres:${EVOLUTION_POSTGRES_PASSWORD}@evolution-postgres:5432/${EVOLUTION_POSTGRES_DB}
+      DATABASE_CONNECTION_URI: postgresql://postgres:${EVOLUTION_POSTGRES_PASSWORD:?EVOLUTION_POSTGRES_PASSWORD is not defined}@evolution-postgres:5432/${EVOLUTION_POSTGRES_DB:?EVOLUTION_POSTGRES_DB is not defined}
 
       CACHE_REDIS_ENABLED: "true"
       CACHE_REDIS_URI: redis://evolution-redis:6379/1

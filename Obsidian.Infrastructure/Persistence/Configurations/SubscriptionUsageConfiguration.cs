@@ -13,7 +13,7 @@ public sealed class SubscriptionUsageConfiguration : IEntityTypeConfiguration<Su
         builder.Property(x => x.SubscriptionId)
             .IsRequired();
 
-        builder.HasOne<Subscription>()
+        builder.HasOne(x => x.Subscription)
             .WithMany(x => x.SubscriptionUsages)
             .HasForeignKey(x => x.SubscriptionId)
             .OnDelete(DeleteBehavior.Cascade);

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Obsidian.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Obsidian.Infrastructure.Persistence;
 namespace Obsidian.Infrastructure.Migrations
 {
     [DbContext(typeof(ObsidianDbContext))]
-    partial class ObsidianDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919145929_Unknown")]
+    partial class Unknown
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -315,6 +318,9 @@ namespace Obsidian.Infrastructure.Migrations
                     b.Property<Guid>("SubscriptionId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("SubscriptionId1")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TenantId")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
@@ -325,6 +331,8 @@ namespace Obsidian.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SubscriptionId");
+
+                    b.HasIndex("SubscriptionId1");
 
                     b.HasIndex("TenantId");
 
@@ -642,9 +650,15 @@ namespace Obsidian.Infrastructure.Migrations
 
             modelBuilder.Entity("Obsidian.Domain.Entities.SubscriptionUsage", b =>
                 {
-                    b.HasOne("Obsidian.Domain.Entities.Subscription", "Subscription")
+                    b.HasOne("Obsidian.Domain.Entities.Subscription", null)
                         .WithMany("SubscriptionUsages")
                         .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Obsidian.Domain.Entities.Subscription", "Subscription")
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

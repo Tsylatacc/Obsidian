@@ -13,7 +13,6 @@ namespace Obsidian.Application.Features
              SignInCommand command,
              ObsidianDbContext db,
              IJwtService jwtService,
-             TenantId tenantId,
              CancellationToken cancellationToken)
         {
             User user = await db.Users
@@ -26,7 +25,7 @@ namespace Obsidian.Application.Features
 
             JwtDto jwtDto = jwtService.GenerateBearerToken(
                 user.Id,
-                Guid.Parse(tenantId.Value),
+                Guid.Parse(user.TenantId!),
                 user.Email);
             return new SignInResult(
                 jwtDto.Token,

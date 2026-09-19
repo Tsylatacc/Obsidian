@@ -1,6 +1,7 @@
 using JasperFx;
 using Obsidian.Application.Features;
 using Obsidian.Infrastructure.Extensions;
+using Obsidian.Infrastructure.Options;
 using Obsidian.Infrastructure.Persistence;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
@@ -41,6 +42,12 @@ builder.Services.AddWolverineHttp();
 
 var app = builder.Build();
 
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    ObsidianDbContext db = scope.ServiceProvider.GetRequiredService<ObsidianDbContext>();
+    await SubscriptionPlanSeeder.SeedAsync(db);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -49,10 +56,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseRouting();
+app.UseCors(CorsOptions.PolicyName);
 
 app.UseAuthentication();
+app.UseRateLimiter();
 
 app.UseAuthorization();
 
