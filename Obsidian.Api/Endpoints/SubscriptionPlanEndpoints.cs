@@ -8,7 +8,7 @@ namespace Obsidian.Api.Endpoints
     public class SubscriptionPlanEndpoints
     {
         [AllowAnonymous]
-        [WolverinePost("/api/plans"), NotTenanted]
+        [WolverineGet("/api/plans"), NotTenanted]
         public static async Task<GetSubscriptionPlansResponse> Get(
             IMessageBus bus,
             CancellationToken cancellationToken)

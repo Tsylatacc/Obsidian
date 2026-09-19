@@ -1,5 +1,4 @@
 ﻿using JasperFx.MultiTenancy;
-using System.Numerics;
 
 namespace Obsidian.Domain.Entities
 {
